@@ -142,16 +142,16 @@ class RedditPost:
         return " ".join(ocr_reader.readtext(self.image, detail=0))
     
     @property
-    def title_sentiment(self):
-        return analyzer.predict(self.title).output
-    
-    @property
     def image_embedding(self):
         inputs = visual_processor(images=self.image, return_tensors="pt")
         with torch.no_grad():
             image_features = visual_model.get_image_features(**inputs)
         image_embedding = image_features / image_features.norm(p=2, dim=-1, keepdim=True)
         return image_embedding.cpu()
+    
+    @property
+    def title_sentiment(self):
+        return analyzer.predict(self.title).output
 
     def __repr__(self):
         return f"RedditPost(post_id={self.post_id}, title={self.title}, poster_id={self.poster_id})"
