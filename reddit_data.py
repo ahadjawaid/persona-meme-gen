@@ -1,8 +1,6 @@
 from pathlib import Path
 import pandas as pd
-from typing import Union
-from dataclasses import dataclass
-from typing import List, Union
+from typing import List, Union, Mapping
 from PIL import Image
 from pysentimiento import create_analyzer
 from transformers import CLIPProcessor, CLIPModel
@@ -14,10 +12,30 @@ visual_model = CLIPModel.from_pretrained(model_name).to(device)
 visual_processor = CLIPProcessor.from_pretrained(model_name)
 analyzer = create_analyzer(task="sentiment", lang="en")
 
+class RedditGraph:
+    def __init__(self, posts: List['RedditPost']):
+        self.redditors: Mapping[str, 'Redditor'] = {}
+
+        if len(posts) > 0:
+            for post in posts:
+                self.add_post(post)
+    
+    def add_post(self, post: 'RedditPost'):
+        if post.poster_id not in self.redditors:
+            self.redditors[post.poster_id] = Redditor(post.poster_id)
+        self.redditors[post.poster_id].add_post(post)
+        
+        for comment in post.comments:
+            if comment.commenter_id not in self.redditors:
+                self.redditors[comment.commenter_id] = Redditor(comment.commenter_id)
+            self.redditors[comment.commenter_id].add_comment(comment)
+
 class Redditor:
     def __init__(self, id: str):
         self.id = id
+        self.postid_set = set()
         self.posts: List[RedditPost] = []
+        self.commentid_set = set()
         self.comments: List[RedditComment] = []
     
     def __repr__(self):
@@ -25,17 +43,26 @@ class Redditor:
     
     def add_post(self, post: 'RedditPost'):
         if post.poster_id == self.id:
-            self.posts.append(post)
+            if post.post_id not in self.postid_set:
+                self.postid_set.add(post.post_id)
+                self.posts.append(post)
+        else:
+            raise ValueError(f"Post does not belong to this Redditor, poster_id: {post.poster_id}, redditor_id: {self.id}")
     
     def add_comment(self, comment: 'RedditComment'):
         if comment.commenter_id == self.id:
-            self.comments.append(comment)
+            if comment.id not in self.commentid_set:
+                self.commentid_set.add(comment.id)
+                self.comments.append(comment)
+        else:
+            raise ValueError("Comment does not belong to this Redditor")
+    
+    @property
+    def user_embedding(self):
+        pass
 
-@dataclass
+
 class RedditComment:
-    commenter_id: str
-    comment: str
-
     def __init__(self, commenter_id: str, comment: str):
         self.commenter_id = commenter_id
         self.text = comment
@@ -43,10 +70,24 @@ class RedditComment:
     @property
     def sentiment(self):
         return analyzer.predict(self.text).output
+    
+    @property
+    def id(self):
+        return f"{self.commenter_id}_{hash(self.text)}"
 
 
 class RedditPost:
-    def __init__(self, post_id: str,  post_url: str, img_path: Union[str, Path], poster_id: str, title: str, subreddit: str, commenter_ids: List[str], top_level_comments: List[str]):
+    def __init__(
+            self, 
+            post_id: str,  
+            post_url: str, 
+            img_path: Union[str, Path], 
+            poster_id: str, 
+            title: str, 
+            subreddit: str, 
+            commenter_ids: List[str], 
+            top_level_comments: List[str]
+        ):
         self.poster_id = poster_id
         self.post_id = post_id
         self.post_url = post_url
@@ -84,7 +125,7 @@ def get_post_data(path: Union[Path, str]) -> pd.DataFrame:
     post_data = pd.read_csv(path)
     post_data['commenter_ids'] = post_data['commenter_ids'].map(eval)
     post_data['top_level_comments'] = post_data['top_level_comments'].map(eval)
-    post_data = post_data.dropna(subset=['post_url'])
+    post_data = post_data.dropna(subset=['post_url', 'poster_id'])
     return post_data
 
 def get_reddit_posts(data_dir: Path, post_data: pd.DataFrame) -> List[RedditPost]:
