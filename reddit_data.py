@@ -146,14 +146,14 @@ class RedditPost:
         return f"RedditPost(post_id={self.post_id}, title={self.title}, poster_id={self.poster_id})"
 
 
-def get_post_data(path: Union[Path, str]) -> pd.DataFrame:
+def get_processed_posts_data_frame(path: Union[Path, str]) -> pd.DataFrame:
     post_data = pd.read_csv(path)
     post_data['commenter_ids'] = post_data['commenter_ids'].map(eval)
     post_data['top_level_comments'] = post_data['top_level_comments'].map(eval)
     post_data = post_data.dropna(subset=['post_url', 'poster_id'])
     return post_data
 
-def get_reddit_posts(data_dir: Path, post_data: pd.DataFrame) -> List[RedditPost]:
+def convert_posts_df_to_reddit_posts(data_dir: Path, post_data: pd.DataFrame) -> List[RedditPost]:
     rows = [row.to_dict() for _, row in post_data.iterrows()]
 
     for row in rows:
