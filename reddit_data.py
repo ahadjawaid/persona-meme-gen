@@ -1,6 +1,6 @@
 from pathlib import Path
 import pandas as pd
-from typing import List, Union, Mapping
+from typing import List, Union, Mapping, Optional
 from PIL import Image
 from pysentimiento import create_analyzer
 from transformers import CLIPProcessor, CLIPModel
@@ -27,6 +27,9 @@ class RedditGraph:
         if len(posts) > 0:
             for post in posts:
                 self.add_post(post)
+
+    def __getitem__(self, redditor_id: str) -> Optional['Redditor']:
+        return self.redditors.get(redditor_id, None)
 
     def __repr__(self):
         return f"RedditGraph(redditors_count={len(self.redditors)})"
