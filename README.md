@@ -18,6 +18,10 @@ Install dependencies
 pip install -r requirements.txt
 ```
 
+## Data
+
+You can download the dataset from the following [link](https://cometmail-my.sharepoint.com/:u:/g/personal/axj200012_utdallas_edu/EebYFTmg8LNMtbPpFuPqkFUBlqFgcjwss_6wsazgzE4e5w?e=d3avV1) (Expires July 10, 2025). You would want to unzip this dataset in the top level of the clone repository.
+
 ## Usage
 
 Use the following command to download meme images from reddit links from the `post.csv`
@@ -40,7 +44,7 @@ reddit_posts = convert_posts_df_to_reddit_posts(data_dir, post_data)
 reddit_graph = RedditGraph(reddit_posts)
 ```
 
-Accessing a redditor using `RedditorGraph`:
+Accessing a redditor using `RedditGraph`:
 
 ```
 redditor = list(reddit_graph.redditors.values())[0] # Indexing the first redditor
