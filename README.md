@@ -24,3 +24,22 @@ Use the following command to download meme images from reddit links from the `po
 ```
 python3 download_meme_images.py
 ```
+
+Initializing the `RedditGraph`:
+
+```
+from pathlib import Path
+from reddit_data import *
+
+data_dir = Path("data")
+post_path = data_dir/"posts.csv"
+
+post_data = get_processed_posts_data_frame(post_path)
+reddit_posts = convert_posts_df_to_reddit_posts(data_dir, post_data)
+
+reddit_graph = RedditGraph(reddit_posts)
+
+redditor = list(reddit_graph.redditors.values())[0]
+print(redditor.user_embedding.shape)
+```
+
