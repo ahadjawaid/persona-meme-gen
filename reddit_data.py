@@ -43,7 +43,7 @@ class Redditor:
         self.comments: List[RedditComment] = []
     
     def __repr__(self):
-        return f"Redditor(id={self.id})"
+        return f"Redditor(id={self.id}, posts_count={len(self.posts)}, comments_count={len(self.comments)})"
     
     def add_post(self, post: 'RedditPost'):
         if post.poster_id == self.id:
@@ -63,11 +63,32 @@ class Redditor:
     
     @property
     def user_embedding(self):
-        pass
+        posts_sentiments: Mapping[str, List['RedditPost']] = {sentiment: [] for sentiment in ["POS", "NEU", "NEG"]}
 
+        for post in self.posts:
+            sentiment = post.title_sentiment
+            posts_sentiments[sentiment].append(post)
+
+        for comment in self.comments:
+            sentiment = comment.sentiment
+            posts_sentiments[sentiment].append(comment.post)
+
+        user_embeddings = []
+        for sentiment in posts_sentiments:
+            sentiment_image_embeddings = [post.image_embedding for post in posts_sentiments[sentiment]]
+
+            if len(sentiment_image_embeddings) == 0:
+                sentiment_image_embeddings.append(torch.zeros(1, 512))
+                
+            post_sentiment_embedding = torch.stack(sentiment_image_embeddings, axis=0)
+            average_sentiment_embedding = post_sentiment_embedding.mean(axis=0).squeeze(0)
+            user_embeddings.append(average_sentiment_embedding)
+
+        return torch.stack(user_embeddings, axis=0)
 
 class RedditComment:
-    def __init__(self, commenter_id: str, comment: str):
+    def __init__(self, source_post: 'RedditPost', commenter_id: str, comment: str):
+        self.post = source_post
         self.commenter_id = commenter_id
         self.text = comment
 
@@ -102,7 +123,7 @@ class RedditPost:
         if len(commenter_ids) != len(top_level_comments):
             raise ValueError("commenter_ids and top_level_comments must have the same length")
         
-        self.comments: List[RedditComment] = [RedditComment(commenter_ids[i], top_level_comments[i]) 
+        self.comments: List[RedditComment] = [RedditComment(self, commenter_ids[i], top_level_comments[i]) 
                                               for i in range(len(commenter_ids))]
     
     @property
