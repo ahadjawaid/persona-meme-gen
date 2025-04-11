@@ -44,9 +44,9 @@ class RedditGraph:
 class Redditor:
     def __init__(self, id: str):
         self.id = id
-        self.postid_set = set()
+        self._postid_set = set()
         self.posts: List[RedditPost] = []
-        self.commentid_set = set()
+        self._commentid_set = set()
         self.comments: List[RedditComment] = []
     
     def __repr__(self):
@@ -54,16 +54,16 @@ class Redditor:
     
     def add_post(self, post: 'RedditPost'):
         if post.poster_id == self.id:
-            if post.post_id not in self.postid_set:
-                self.postid_set.add(post.post_id)
+            if post.post_id not in self._postid_set:
+                self._postid_set.add(post.post_id)
                 self.posts.append(post)
         else:
             raise ValueError(f"Post does not belong to this Redditor, poster_id: {post.poster_id}, redditor_id: {self.id}")
     
     def add_comment(self, comment: 'RedditComment'):
         if comment.commenter_id == self.id:
-            if comment.id not in self.commentid_set:
-                self.commentid_set.add(comment.id)
+            if comment.id not in self._commentid_set:
+                self._commentid_set.add(comment.id)
                 self.comments.append(comment)
         else:
             raise ValueError("Comment does not belong to this Redditor")
