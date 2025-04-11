@@ -6,10 +6,14 @@ from pysentimiento import create_analyzer
 from transformers import CLIPProcessor, CLIPModel
 import torch
 
+# Models needed for computed properties
+# Image Embedding
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model_name = "openai/clip-vit-base-patch32"
 visual_model = CLIPModel.from_pretrained(model_name).to(device)
 visual_processor = CLIPProcessor.from_pretrained(model_name)
+
+# Sentiment Analysis
 analyzer = create_analyzer(task="sentiment", lang="en")
 
 class RedditGraph:
