@@ -31,7 +31,7 @@ python3 download_meme_images.py
 
 Initializing the `RedditGraph`:
 
-```
+```python
 from pathlib import Path
 from reddit_data import *
 
@@ -46,7 +46,7 @@ reddit_graph = RedditGraph(reddit_posts)
 
 Accessing a redditor using `RedditGraph`:
 
-```
+```python
 redditor = list(reddit_graph.redditors.values())[0] # Indexing the first redditor
 print(redditor.user_embedding.shape)
 ```
