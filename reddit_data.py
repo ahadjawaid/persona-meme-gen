@@ -23,6 +23,9 @@ class RedditGraph:
         if len(posts) > 0:
             for post in posts:
                 self.add_post(post)
+
+    def __repr__(self):
+        return f"RedditGraph(redditors_count={len(self.redditors)})"
     
     def add_post(self, post: 'RedditPost'):
         if post.poster_id not in self.redditors:

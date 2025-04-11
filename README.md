@@ -38,8 +38,11 @@ post_data = get_processed_posts_data_frame(post_path)
 reddit_posts = convert_posts_df_to_reddit_posts(data_dir, post_data)
 
 reddit_graph = RedditGraph(reddit_posts)
-
-redditor = list(reddit_graph.redditors.values())[0]
-print(redditor.user_embedding.shape)
 ```
 
+Accessing a redditor using `RedditorGraph`:
+
+```
+redditor = list(reddit_graph.redditors.values())[0] # Indexing the first redditor
+print(redditor.user_embedding.shape)
+```
