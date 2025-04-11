@@ -5,6 +5,7 @@ from PIL import Image
 from pysentimiento import create_analyzer
 from transformers import CLIPProcessor, CLIPModel
 import torch
+import easyocr
 
 # Models needed for computed properties
 # Image Embedding
@@ -15,6 +16,9 @@ visual_processor = CLIPProcessor.from_pretrained(model_name)
 
 # Sentiment Analysis
 analyzer = create_analyzer(task="sentiment", lang="en")
+
+# Optical Character Recognition
+ocr_reader = easyocr.Reader(['en'], gpu=torch.cuda.is_available())
 
 class RedditGraph:
     def __init__(self, posts: List['RedditPost']):
@@ -132,6 +136,10 @@ class RedditPost:
     @property
     def image(self):
         return Image.open(self.img_path)
+    
+    @property
+    def image_text(self):
+        return " ".join(ocr_reader.readtext(self.image, detail=0))
     
     @property
     def title_sentiment(self):
