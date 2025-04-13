@@ -8,14 +8,16 @@ template_img_path = Path("data/templates")
 template_dict = json.load(template_path.open())
 template_img_path.mkdir(exist_ok=True)
 
+id_history = set()
 for name, (url, id) in tqdm(template_dict.items()):
     normalized_name = name.lower().replace("/", " ").replace(" ", "_")
     file_name = f"{id}-{normalized_name}"
     file_extension = url.split(".")[-1]
     file_path = template_img_path / f"{file_name}.{file_extension}"
 
-    if not file_path.exists():
+    if not file_path.exists() and id not in id_history:
         try:
             download_image(url, file_path)
         except Exception as e:
             continue
+    id_history.add(id)
