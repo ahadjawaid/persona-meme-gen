@@ -146,11 +146,7 @@ class RedditPost:
     
     @property
     def image_embedding(self):
-        inputs = visual_processor(images=self.image, return_tensors="pt")
-        with torch.no_grad():
-            image_features = visual_model.get_image_features(**inputs)
-        image_embedding = image_features / image_features.norm(p=2, dim=-1, keepdim=True)
-        return image_embedding.cpu()
+        return compute_image_embedding(self.image)
     
     @property
     def title_sentiment(self):
@@ -159,6 +155,13 @@ class RedditPost:
     def __repr__(self):
         return f"RedditPost(post_id={self.post_id}, title={self.title}, poster_id={self.poster_id})"
 
+
+def compute_image_embedding(image: Image.Image) -> torch.Tensor:
+    inputs = visual_processor(images=image, return_tensors="pt")
+    with torch.no_grad():
+        image_features = visual_model.get_image_features(**inputs)
+    image_embedding = image_features / image_features.norm(p=2, dim=-1, keepdim=True)
+    return image_embedding.cpu()
 
 def get_processed_posts_data_frame(path: Union[Path, str]) -> pd.DataFrame:
     post_data = pd.read_csv(path)
