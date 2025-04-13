@@ -22,11 +22,18 @@ pip install -r requirements.txt
 
 You can download the dataset from the following [link](https://cometmail-my.sharepoint.com/:u:/g/personal/axj200012_utdallas_edu/EebYFTmg8LNMtbPpFuPqkFUBlqFgcjwss_6wsazgzE4e5w?e=d3avV1) (Expires July 10, 2025). You would want to unzip this dataset in the top level of the clone repository.
 
+Download the templates json from [link](https://github.com/Social-AI-Studio/MemeCraft/blob/main/dataset/meme_template.json).
+
 ## Usage
 
 Use the following command to download meme images from reddit links from the `post.csv`
 ```
 python3 download_meme_images.py
+```
+
+Use the following command to download meme templates from `meme_template.json`
+```
+python3 download_meme_templates.py
 ```
 
 Initializing the `RedditGraph`:
